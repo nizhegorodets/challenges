@@ -30,8 +30,6 @@ jobs:
       
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v1
-        with: 
-          terraform_wrapper: false
 
       - name: Terraform Format
         id: fmt1
@@ -89,22 +87,25 @@ jobs:
         working-directory: ./flugel.it/terraform
       
       - name: afadf
+        id: terra_output
         run:  terraform output instance_public_uri
         working-directory: ./flugel.it/terraform
         
       - name: sdfsdf
-        run: export aws_ip="$(terraform output instance_public_uri)"
+        id: setting_output
+        run: echo ::set-output name=ec2_uri::$(terraform output instance_public_uri)
         
-        
-      - name: sdfsdfdd
-        run: echo $aws_ip
+      - name: fssdf
+        run: echo "The selected color is ${{ steps.setting_output.outputs.ec2_uri }}"         
+        env:
+          EC2_URI: "The selected color is ${{ steps.setting_output.outputs.ec2_uri }}"
         
       - name: afadf
-        run:  echo ${{ steps.terraid.outputs.instance_public_uri }}
+        run:  echo $EC2_URI
         
         
       - name: checking py service
-        run: curl $aws_ip:8000/tags
+        run: curl ${EC2_URI}:8000/tags
         
       - name: checking py service
         run: curl ${{ steps.terraid.outputs.instance_public_uri }}:8000/tags
