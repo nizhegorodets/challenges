@@ -22,23 +22,23 @@ resource "aws_iam_role" "tags_reader" {
 
 resource "aws_iam_instance_profile" "tags_reader" {
   name = "test_profile"
-  role = "${aws_iam_role.tags_reader.name}"
+  role = aws_iam_role.tags_reader.name
 }
 
 resource "aws_iam_role_policy" "tags_reader" {
   name = "test_policy"
-  role = "${aws_iam_role.tags_reader.id}"
+  role = aws_iam_role.tags_reader.id
 
   policy = jsonencode({
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Action": [
-                "ec2:*"
-            ],
-            "Effect": "Allow",
-            "Resource": "*"
-        }
+    "Version" : "2012-10-17",
+    "Statement" : [
+      {
+        "Action" : [
+          "ec2:*"
+        ],
+        "Effect" : "Allow",
+        "Resource" : "*"
+      }
     ]
   })
 }
