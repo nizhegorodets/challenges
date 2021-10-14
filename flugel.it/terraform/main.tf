@@ -49,7 +49,7 @@ resource "aws_instance" "ec2_manager_service" {
   instance_type          = "t2.micro"
   key_name               = aws_key_pair.instance_key_pair.key_name
   vpc_security_group_ids = ["${aws_security_group.webSG.id}"]
-  iam_instance_profile   = aws_iam_instance_profile.tags_reader_profile.name
+  iam_instance_profile   = aws_iam_instance_profile.tags_reader.name
 
   tags = var.tags
 
@@ -61,8 +61,8 @@ resource "aws_instance" "ec2_manager_service" {
   }
 
   provisioner "file" {
-    source      = "../service.py"
-    destination = "/tmp/service.py"
+    source      = "../ec2manager.py"
+    destination = "/tmp/ec2manager.py"
   }
 
   provisioner "file" {
@@ -76,7 +76,7 @@ resource "aws_instance" "ec2_manager_service" {
       "sudo apt-get install python3-pip -y -qq",
       "sudo pip install boto3",
       "sudo pip install ec2-metadata",
-      "chmod +x /tmp/service.py",
+      "chmod +x /tmp/ec2manager.py",
       "sudo mv /tmp/p.service /etc/systemd/system/p.service",
       "sudo apt-get install apache2 -y -qq",
       "sudo service apache2 start",

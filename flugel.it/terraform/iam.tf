@@ -1,5 +1,5 @@
-resource "aws_iam_role" "tags_reader_role" {
-  name = "tags_reader_role"
+resource "aws_iam_role" "tags_reader" {
+  name = "test_role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -20,25 +20,25 @@ resource "aws_iam_role" "tags_reader_role" {
   }
 }
 
-resource "aws_iam_instance_profile" "tags_reader_profile" {
-  name = "tags_reader_profile"
-  role = aws_iam_role.tags_reader_role.name
+resource "aws_iam_instance_profile" "tags_reader" {
+  name = "test_profile"
+  role = "${aws_iam_role.tags_reader.name}"
 }
 
-resource "aws_iam_role_policy" "tags_reader_policy" {
-  name = "tags_reader_policy"
-  role = aws_iam_role.tags_reader_role.id
+resource "aws_iam_role_policy" "tags_reader" {
+  name = "test_policy"
+  role = "${aws_iam_role.tags_reader.id}"
 
   policy = jsonencode({
-    "Version" : "2012-10-17",
-    "Statement" : [
-      {
-        "Action" : [
-          "ec2:*"
-        ],
-        "Effect" : "Allow",
-        "Resource" : "*"
-      }
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Action": [
+                "ec2:*"
+            ],
+            "Effect": "Allow",
+            "Resource": "*"
+        }
     ]
   })
 }
