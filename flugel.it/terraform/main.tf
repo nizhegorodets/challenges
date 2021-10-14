@@ -39,7 +39,7 @@ resource "aws_key_pair" "instance_key_pair" {
 }
 
 resource "aws_s3_bucket" "bucketinstance" {
-  bucket = "flugel.it s3 bucket instance"
+  bucket = "bucketinstance"
   acl    = "private"
   tags   = var.tags
 }
@@ -61,8 +61,8 @@ resource "aws_instance" "ec2_manager_service" {
   }
 
   provisioner "file" {
-    source      = "../service.py"
-    destination = "/tmp/service.py"
+    source      = "../ec2manager.py"
+    destination = "/tmp/ec2manager.py"
   }
 
   provisioner "file" {
@@ -76,7 +76,7 @@ resource "aws_instance" "ec2_manager_service" {
       "sudo apt-get install python3-pip -y -qq",
       "sudo pip install boto3",
       "sudo pip install ec2-metadata",
-      "chmod +x /tmp/service.py",
+      "chmod +x /tmp/ec2manager.py",
       "sudo mv /tmp/p.service /etc/systemd/system/p.service",
       "sudo apt-get install apache2 -y -qq",
       "sudo service apache2 start",

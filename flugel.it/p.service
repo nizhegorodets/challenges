@@ -4,6 +4,6 @@ After=multi-user.target
 [Service]
 Type=simple
 Restart=always
-ExecStart=/usr/bin/python3 /tmp/service.py
+ExecStart=/usr/bin/python3 /tmp/ec2manager.py
 [Install]
 WantedBy=multi-user.target

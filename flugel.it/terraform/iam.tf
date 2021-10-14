@@ -1,5 +1,5 @@
 resource "aws_iam_role" "tags_reader" {
-  name = "tags_reader_role"
+  name = "test_role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -21,12 +21,12 @@ resource "aws_iam_role" "tags_reader" {
 }
 
 resource "aws_iam_instance_profile" "tags_reader" {
-  name = "tags_reader_profile"
+  name = "test_profile"
   role = aws_iam_role.tags_reader.name
 }
 
 resource "aws_iam_role_policy" "tags_reader" {
-  name = "tags_reader_policy"
+  name = "test_policy"
   role = aws_iam_role.tags_reader.id
 
   policy = jsonencode({
