@@ -1,4 +1,4 @@
-resource "aws_iam_role" "tags_reader" {
+resource "aws_iam_role" "tags_reader_role" {
   name = "tags_reader_role"
 
   assume_role_policy = jsonencode({
@@ -20,14 +20,14 @@ resource "aws_iam_role" "tags_reader" {
   }
 }
 
-resource "aws_iam_instance_profile" "tags_reader" {
+resource "aws_iam_instance_profile" "tags_reader_profile" {
   name = "tags_reader_profile"
-  role = aws_iam_role.tags_reader.name
+  role = aws_iam_role.tags_reader_role.name
 }
 
-resource "aws_iam_role_policy" "tags_reader" {
+resource "aws_iam_role_policy" "tags_reader_policy" {
   name = "tags_reader_policy"
-  role = aws_iam_role.tags_reader.id
+  role = aws_iam_role.tags_reader_role.id
 
   policy = jsonencode({
     "Version" : "2012-10-17",
