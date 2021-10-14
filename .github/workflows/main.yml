@@ -90,6 +90,7 @@ jobs:
       
       - name: afadf
         run:  terraform output instance_public_uri
+        working-directory: ./flugel.it/terraform
         
       - name: sdfsdf
         run: export aws_ip="$(terraform output instance_public_uri)"
