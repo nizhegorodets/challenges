@@ -94,6 +94,7 @@ jobs:
       - name: sdfsdf
         id: setting_output
         run: echo "::set-output name=ec2_uri::$(terraform output instance_public_uri)"
+        working-directory: ./flugel.it/terraform
         
       - name: fssdf
         run: echo "The selected color is ${{ steps.setting_output.outputs.ec2_uri }}"         
