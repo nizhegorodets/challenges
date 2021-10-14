@@ -39,7 +39,7 @@ resource "aws_key_pair" "instance_key_pair" {
 }
 
 resource "aws_s3_bucket" "bucketinstance" {
-  bucket = "flugel.it s3 bucket instance"
+  bucket = "bucketinstance"
   acl    = "private"
   tags   = var.tags
 }
