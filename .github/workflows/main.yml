@@ -93,7 +93,7 @@ jobs:
         
       - name: sdfsdf
         id: setting_output
-        run: echo ::set-output name=ec2_uri::$(terraform output instance_public_uri)
+        run: echo "::set-output name=ec2_uri::$(terraform output instance_public_uri)"
         
       - name: fssdf
         run: echo "The selected color is ${{ steps.setting_output.outputs.ec2_uri }}"         
