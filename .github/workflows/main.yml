@@ -105,9 +105,11 @@ jobs:
         run:  echo $EC2_URI
         
         
-      - name: checking py service
-        run: curl $(terraform output instance_public_uri):8000/tags
-        working-directory: ./flugel.it/terraform
+      - name: curl
+        uses: wei/curl@master
+        with:
+          args: "${{(terraform output instance_public_uri)}}:8000/tags"
+          working-directory: ./flugel.it/terraform
         
       - name: checking py service
         run: curl ${{ steps.terraid.outputs.instance_public_uri }}:8000/tags
