@@ -1,6 +1,6 @@
 # This is a basic workflow to help you get started with Actions
 
-name: CI
+name: flugel.it
 
 # Controls when the workflow will run
 on:
@@ -16,6 +16,7 @@ env:
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
   
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # This workflow contains a single job called "build"
   build:
@@ -27,37 +28,88 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
       
-      - uses: actions/setup-go@v2
-        with:
-          go-version: ${{ matrix.go }}
-
-      - name: install dependencies
-        run: go get github.com/gruntwork-io/terratest/modules/aws
-     
-      - name: install dependencies1
-        run: go get github.com/stretchr/testify/assert
-        
-      - name: install dependencies
-        run: go get github.com/gruntwork-io/terratest/modules/terraform
-     
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v1
+        with: 
+          terraform_wrapper: false
 
       - name: Terraform Format
-        id: fmt
+        id: fmt1
         run: terraform fmt -check
         working-directory: ./flugel.it/terraform
         
       - name: Terraform Init
-        id: init
+        id: init1
         run: terraform init
         working-directory: ./flugel.it/terraform
 
       - name: Terraform Validate
-        id: validate
+        id: validate1
         run: terraform validate -no-color
         working-directory: ./flugel.it/terraform
         
-      - name: Test
-        run: go test -v ./...
+      - name: Terraform Plan
+        id: plan
+        if: github.event_name == 'pull_request'
+        run: terraform plan -no-color
+        continue-on-error: true
+        working-directory: ./flugel.it/terraform
+        
+      - name: Update Pull Request
+        uses: actions/github-script@0.9.0
+        if: github.event_name == 'pull_request'
+        env:
+          PLAN: "terraform\n${{ steps.plan.outputs.stdout }}"
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const output = `#### Terraform Format and Style 🖌\`${{ steps.fmt.outcome }}\`
+            #### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
+            #### Terraform Plan 📖\`${{ steps.plan.outcome }}\`
+            #### Terraform Validation 🤖\`${{ steps.validate.outcome }}\`
+            <details><summary>Show Plan</summary>
+            \`\`\`\n
+            ${process.env.PLAN}
+            \`\`\`
+            </details>
+            *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`*`;
+            github.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            })
+      - name: Terraform Plan Status
+        if: steps.plan.outcome == 'failure'
+        run: exit 1
+        
+      - name: Terraform Apply
+        id: terraid
+        run: terraform apply -auto-approve
+        working-directory: ./flugel.it/terraform
       
+      - name: afadf
+        run:  terraform output instance_public_uri
+        
+      - name: sdfsdf
+        run: export aws_ip="$(terraform output instance_public_uri)"
+        
+        
+      - name: sdfsdfdd
+        run: echo $aws_ip
+        
+      - name: afadf
+        run:  echo ${{ steps.terraid.outputs.instance_public_uri }}
+        
+        
+      - name: checking py service
+        run: curl $aws_ip:8000/tags
+        
+      - name: checking py service
+        run: curl ${{ steps.terraid.outputs.instance_public_uri }}:8000/tags
+        
+        
+      - name: Clean up
+        if: always()
+        run: terraform destroy -auto-approve
+        working-directory: ./flugel.it/terraform
