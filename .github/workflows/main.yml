@@ -120,6 +120,13 @@ jobs:
         run: curl "${{ steps.setting_output.outputs.ec2_uri }}:8000/tags"
         
         
+        
+      - name: curl
+        uses: wei/curl@master
+        with:
+          args: "${{ steps.setting_output.outputs.ec2_uri }}:8000/tags"
+        
+        
       - name: Clean up
         if: always()
         run: terraform destroy -auto-approve
