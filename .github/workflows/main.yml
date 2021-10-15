@@ -116,13 +116,8 @@ jobs:
         with:
           time: '90s'
         
-      - name: Make Request
-        id: myRequest
-        uses: fjogeleit/http-request-action@master
-        with:
-          url: "${{ steps.setting_output.outputs.ec2_uri }}:8000/tags"
-      - name: Show Response
-        run: echo ${{ steps.myRequest.outputs.response }}
+      - name: sdfsd
+        run: ping "${{ steps.setting_output.outputs.ec2_uri }}:8000"
         
       - name: checking py service
         run: curl "${{ steps.setting_output.outputs.ec2_uri }}:8000/tags"
