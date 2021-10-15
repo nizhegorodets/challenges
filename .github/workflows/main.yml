@@ -115,11 +115,10 @@ jobs:
       - name: curl
         uses: wei/curl@master
         with:
-          args: "$(terraform output instance_public_uri):8000/tags"
-          working-directory: ./flugel.it/terraform
+          args: "${{ steps.setting_output.outputs.ec2_uri }}:8000/tags"
         
       - name: checking py service
-        run: curl ${{ steps.terraid.outputs.instance_public_uri }}:8000/tags
+        run: curl "${{ steps.setting_output.outputs.ec2_uri }}:8000/tags"
         
         
       - name: Clean up
