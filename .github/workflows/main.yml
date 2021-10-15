@@ -114,12 +114,7 @@ jobs:
       - name: Sleep for 30 seconds
         uses: jakejarvis/wait-action@master
         with:
-          time: '60s'
-        
-      - name: curl
-        uses: wei/curl@master
-        with:
-          args: "${{ steps.setting_output.outputs.ec2_uri }}:8000/tags"
+          time: '90s'
         
       - name: checking py service
         run: curl "${{ steps.setting_output.outputs.ec2_uri }}:8000/tags"
