@@ -30,6 +30,8 @@ jobs:
       
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_wrapper: false
 
       - name: Terraform Format
         id: fmt1
@@ -88,7 +90,7 @@ jobs:
       
       - name: afadf
         id: terra_output
-        run: output=$(terraform output instance_public_uri)
+        run: export output=$(terraform output instance_public_uri)
         working-directory: ./flugel.it/terraform
         
       - name: afadf
