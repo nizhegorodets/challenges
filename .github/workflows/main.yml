@@ -88,7 +88,12 @@ jobs:
       
       - name: afadf
         id: terra_output
-        run:  terraform output instance_public_uri
+        run: output=$(terraform output instance_public_uri)
+        working-directory: ./flugel.it/terraform
+        
+      - name: afadf
+        id: terra_output1
+        run: echo $output
         working-directory: ./flugel.it/terraform
         
       - name: sdfsdf
