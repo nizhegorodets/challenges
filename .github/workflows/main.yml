@@ -116,9 +116,6 @@ jobs:
         with:
           time: '90s'
         
-      - name: sdfsd
-        run: ping "${{ steps.setting_output.outputs.ec2_uri }}:8000"
-        
       - name: checking py service
         run: curl "${{ steps.setting_output.outputs.ec2_uri }}:8000/tags"
         
