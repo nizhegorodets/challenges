@@ -111,6 +111,10 @@ jobs:
       - name: afadf
         run:  echo $EC2_URI
         
+      - name: Sleep for 30 seconds
+        uses: jakejarvis/wait-action@master
+        with:
+          time: '60s'
         
       - name: curl
         uses: wei/curl@master
