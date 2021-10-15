@@ -27,10 +27,74 @@ jobs:
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
-            
+      
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
+
+      - name: Terraform Format
+        id: fmt1
+        run: terraform fmt -check
+        working-directory: ./flugel.it/terraform
+        
+      - name: Terraform Init
+        id: init1
+        run: terraform init
+        working-directory: ./flugel.it/terraform
+
+      - name: Terraform Validate
+        id: validate1
+        run: terraform validate -no-color
+        working-directory: ./flugel.it/terraform
+        
+      - name: Terraform Plan
+        id: plan
+        if: github.event_name == 'pull_request'
+        run: terraform plan -no-color
+        continue-on-error: true
+        working-directory: ./flugel.it/terraform
+        
+      - name: Update Pull Request
+        uses: actions/github-script@0.9.0
+        if: github.event_name == 'pull_request'
+        env:
+          PLAN: "terraform\n${{ steps.plan.outputs.stdout }}"
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const output = `#### Terraform Format and Style 🖌\`${{ steps.fmt.outcome }}\`
+            #### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
+            #### Terraform Plan 📖\`${{ steps.plan.outcome }}\`
+            #### Terraform Validation 🤖\`${{ steps.validate.outcome }}\`
+            <details><summary>Show Plan</summary>
+            \`\`\`\n
+            ${process.env.PLAN}
+            \`\`\`
+            </details>
+            *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`*`;
+            github.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            })
+      - name: Terraform Plan Status
+        if: steps.plan.outcome == 'failure'
+        run: exit 1
+        
+      - name: Terraform Apply
+        id: terraid
+        run: terraform apply -auto-approve
+        working-directory: ./flugel.it/terraform
+      
+      - name: afadf
+        id: terra_output
+        run:  terraform output instance_public_uri
+        working-directory: ./flugel.it/terraform
+        
       - name: sdfsdf
         id: setting_output
-        run: echo ::set-output name=ec2_uri::green
+        run: echo ::set-output name=ec2_uri::$(terraform output instance_public_uri -raw)
+        working-directory: ./flugel.it/terraform
         
       - name: fssdf
         run: echo "The selected color is ${{ steps.setting_output.outputs.ec2_uri }}"         
@@ -44,8 +108,14 @@ jobs:
       - name: curl
         uses: wei/curl@master
         with:
-          args: $EC2_URI
-
-      - name: checking py service
-        run: curl $EC2_URI:8000/tags
+          args: "$(terraform output instance_public_uri):8000/tags"
+          working-directory: ./flugel.it/terraform
         
+      - name: checking py service
+        run: curl ${{ steps.terraid.outputs.instance_public_uri }}:8000/tags
+        
+        
+      - name: Clean up
+        if: always()
+        run: terraform destroy -auto-approve
+        working-directory: ./flugel.it/terraform
