@@ -64,7 +64,7 @@ jobs:
         
       - name: sdfsdf
         id: setting_output
-        run: echo "::set-output name=app_url::$(terraform output -raw application_url)"
+        run: echo "::set-output name=app_url::$(terraform-bin output -raw application_url)"
         working-directory: ./flugel.it/terraform
         
       - name: Sleep for 90 seconds
