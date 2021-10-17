@@ -85,10 +85,10 @@ jobs:
         run: echo "::set-output name=app_url::$(terraform output -raw application_url)"
         working-directory: ./flugel.it/terraform
         
-      - name: Sleep for 30 seconds
+      - name: Sleep for 60 seconds
         uses: jakejarvis/wait-action@master
         with:
-          time: '30s'
+          time: '60s'
         
       - name: checking py serviceh
         run: curl "${{ steps.setting_output.outputs.app_url }}/tags"
