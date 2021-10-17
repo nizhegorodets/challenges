@@ -96,6 +96,7 @@ jobs:
       - name: checking py serviceh
         id: service_shutdown
         run: curl "${{ steps.setting_output.outputs.app_url }}/shutdown"
+        continue-on-error: true
         
       - name: checking py serviceh
         id: ex_st
