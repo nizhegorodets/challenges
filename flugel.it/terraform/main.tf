@@ -48,10 +48,10 @@ resource "aws_instance" "ec2_manager_service" {
   ami                    = data.aws_ami.ubuntu.id
   instance_type          = "t2.micro"
   key_name               = aws_key_pair.instance_key_pair.key_name
-  vpc_security_group_ids = ["${aws_security_group.webSG.id}"]
+  vpc_security_group_ids = [aws_security_group.webSG.id]
   iam_instance_profile   = aws_iam_instance_profile.tags_reader.name
-
-  tags = var.tags
+  user_data              = file("../init-script.sh")
+  tags                   = var.tags
 
   connection {
     type        = "ssh"
@@ -70,26 +70,26 @@ resource "aws_instance" "ec2_manager_service" {
     destination = "/tmp/p.service"
   }
 
-  provisioner "remote-exec" {
-    inline = [
-      "sudo apt-get update -y -qq",
-      "sudo apt-get install python3-pip -y -qq",
-      "sudo pip install boto3",
-      "sudo pip install ec2-metadata",
-      "chmod +x /tmp/ec2manager.py",
-      "sudo mv /tmp/p.service /etc/systemd/system/p.service",
-      "sudo apt-get install apache2 -y -qq",
-      "sudo service apache2 start",
-      "sudo systemctl enable p.service",
-      "sudo systemctl start p.service",
-    ]
-  }
+  # provisioner "remote-exec" {
+  #   inline = [
+  #     "sudo apt-get update -y -qq",
+  #     "sudo apt-get install python3-pip -y -qq",
+  #     "sudo pip install boto3",
+  #     "sudo pip install ec2-metadata",
+  #     "chmod +x /tmp/ec2manager.py",
+  #     "sudo mv /tmp/p.service /etc/systemd/system/p.service",
+  #     "sudo apt-get install apache2 -y -qq",
+  #     "sudo service apache2 start",
+  #     "sudo systemctl enable p.service",
+  #     "sudo systemctl start p.service",
+  #   ]
+  # }
 }
 
 
 resource "aws_security_group" "webSG" {
   name        = "flugel.it security group"
-  description = "Allow ssh  inbound traffic"
+  description = "Allow ssh and http traffic inbound traffic"
 
   ingress {
     from_port   = 22
@@ -106,8 +106,8 @@ resource "aws_security_group" "webSG" {
   }
 
   ingress {
-    from_port   = 8001
-    to_port     = 8001
+    from_port   = 8000
+    to_port     = 8000
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
