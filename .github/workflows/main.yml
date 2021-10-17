@@ -1,6 +1,5 @@
 name: flugel.it
 
-# Controls when the workflow will run
 on:
   push:
     branches: [ main ]
@@ -13,13 +12,9 @@ env:
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
 jobs:
-  build:
-    # The type of runner that the job will run on
+  go_test:
     runs-on: ubuntu-latest
-
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
       
       - name: Setup Terraform
@@ -55,6 +50,29 @@ jobs:
 
       - name: Run Go Test
         run: go test -v ./...
+        
+  terraform_test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_wrapper: false
+
+      - name: Terraform Format
+        run: terraform fmt -check
+        working-directory: ./flugel.it/terraform
+        
+      - name: Terraform Init
+        run: terraform init
+        working-directory: ./flugel.it/terraform
+
+      - name: Terraform Validate
+        run: terraform validate -no-color
+        working-directory: ./flugel.it/terraform
       
       - name: Terraform Plan
         id: plan
@@ -81,23 +99,24 @@ jobs:
         with:
           time: '90s'
         
-      - name: Check ec2managment service - tags endpoint
+      - name: Check ec2manager service - tags endpoint
         run: curl "${{ steps.terraform_output.outputs.app_url }}/tags"
         
-      - name: Shutdown ec2managment service
+      - name: Shutdown ec2manager service
         run: curl "${{ steps.terraform_output.outputs.app_url }}/shutdown"
         continue-on-error: true
         
-      - name: Check ec2managment service - tags endpoint
-        id: ec2managment_status
+      - name: Check ec2manager service - tags endpoint
+        id: ec2manager_status
         run: curl "${{ steps.terraform_output.outputs.app_url }}/tags"
         continue-on-error: true 
         
-      - name: Ensure ec2managment_status failed
-        if: steps.ec2managment_status.outcome != 'failure' 
+      - name: Ensure ec2manager_status failed
+        if: steps.ec2manager_status.outcome != 'failure' 
         run: exit code 1
         
       - name: Clean up
         if: always()
         run: terraform destroy -auto-approve
         working-directory: ./flugel.it/terraform
+
