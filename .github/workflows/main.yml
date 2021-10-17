@@ -1,24 +1,18 @@
-# This is a basic workflow to help you get started with Actions
-
 name: flugel.it
 
 # Controls when the workflow will run
 on:
-  # Triggers the workflow on push or pull request events but only for the main branch
   push:
     branches: [ main ]
   pull_request:
 
-  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
 env:
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-  
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+
 jobs:
-  # This workflow contains a single job called "build"
   build:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
@@ -34,34 +28,32 @@ jobs:
           terraform_wrapper: false
 
       - name: Terraform Format
-        id: fmt1
         run: terraform fmt -check
         working-directory: ./flugel.it/terraform
         
       - name: Terraform Init
-        id: init1
         run: terraform init
         working-directory: ./flugel.it/terraform
 
       - name: Terraform Validate
-        id: validate1
         run: terraform validate -no-color
         working-directory: ./flugel.it/terraform
         
-      - uses: actions/setup-go@v2
+      - name: Setup Go
+        uses: actions/setup-go@v2
         with:
           go-version: ${{ matrix.go }}
 
-      - name: install dependencies
+      - name: Install Go dependencies - terratest/aws
         run: go get github.com/gruntwork-io/terratest/modules/aws
      
-      - name: install dependencies1
+      - name: Install Go dependencies - testify
         run: go get github.com/stretchr/testify/assert
         
-      - name: install dependencies
+      - name: Install Go dependencies - terratest/terraform
         run: go get github.com/gruntwork-io/terratest/modules/terraform
 
-      - name: Test
+      - name: Run Go Test
         run: go test -v ./...
       
       - name: Terraform Plan
@@ -76,35 +68,33 @@ jobs:
         run: exit 1
         
       - name: Terraform Apply
-        id: terraid
         run: terraform apply -auto-approve
         working-directory: ./flugel.it/terraform
         
-      - name: sdfsdf
-        id: setting_output
+      - name: Extract terraform output
+        id: terraform_output
         run: echo "::set-output name=app_url::$(terraform output -raw application_url)"
         working-directory: ./flugel.it/terraform
         
-      - name: Sleep for 90 seconds
+      - name: Sleep for 90 seconds (wait for server deploying)
         uses: jakejarvis/wait-action@master
         with:
           time: '90s'
         
-      - name: checking py serviceh
-        run: curl "${{ steps.setting_output.outputs.app_url }}/tags"
+      - name: Check ec2managment service - tags endpoint
+        run: curl "${{ steps.terraform_output.outputs.app_url }}/tags"
         
-      - name: checking py serviceh
-        id: service_shutdown
-        run: curl "${{ steps.setting_output.outputs.app_url }}/shutdown"
+      - name: Shutdown ec2managment service
+        run: curl "${{ steps.terraform_output.outputs.app_url }}/shutdown"
         continue-on-error: true
         
-      - name: checking py serviceh
-        id: ex_st
-        run: curl "${{ steps.setting_output.outputs.app_url }}/tags"
+      - name: Check ec2managment service - tags endpoint
+        id: ec2managment_status
+        run: curl "${{ steps.terraform_output.outputs.app_url }}/tags"
         continue-on-error: true 
         
-      - name: sdfd
-        if: steps.ex_st.outcome == 'failure' 
+      - name: Ensure ec2managment_status failed
+        if: steps.ec2managment_status.outcome != 'failure' 
         run: exit code 1
         
       - name: Clean up
