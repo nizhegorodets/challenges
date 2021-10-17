@@ -73,11 +73,11 @@ jobs:
           time: '90s'
         
       - name: checking py serviceh
-        run: curl "${{ steps.setting_output.outputs.app_url }}:8000/tags"
+        run: curl "${{ steps.setting_output.outputs.app_url }}/tags"
         continue-on-error: true
         
       - name: checking py serviceh
-        run: curl "${{ steps.setting_output.outputs.app_url }}:8000/tags"
+        run: curl "${{ steps.setting_output.outputs.app_url }}/tags"
         continue-on-error: true
         
       - name: Clean up
