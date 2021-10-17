@@ -46,6 +46,22 @@ jobs:
         run: terraform validate -no-color
         working-directory: ./flugel.it/terraform
         
+      - uses: actions/setup-go@v2
+        with:
+          go-version: ${{ matrix.go }}
+
+      - name: install dependencies
+        run: go get github.com/gruntwork-io/terratest/modules/aws
+     
+      - name: install dependencies1
+        run: go get github.com/stretchr/testify/assert
+        
+      - name: install dependencies
+        run: go get github.com/gruntwork-io/terratest/modules/terraform
+
+      - name: Test
+        run: go test -v ./...
+      
       - name: Terraform Plan
         id: plan
         if: github.event_name == 'pull_request'
