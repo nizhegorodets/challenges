@@ -30,8 +30,6 @@ jobs:
       
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v1
-        with:
-          terraform_wrapper: false
 
       - name: Terraform Format
         id: fmt1
@@ -55,30 +53,6 @@ jobs:
         continue-on-error: true
         working-directory: ./flugel.it/terraform
         
-      - name: Update Pull Request
-        uses: actions/github-script@0.9.0
-        if: github.event_name == 'pull_request'
-        env:
-          PLAN: "terraform\n${{ steps.plan.outputs.stdout }}"
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const output = `#### Terraform Format and Style 🖌\`${{ steps.fmt.outcome }}\`
-            #### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
-            #### Terraform Plan 📖\`${{ steps.plan.outcome }}\`
-            #### Terraform Validation 🤖\`${{ steps.validate.outcome }}\`
-            <details><summary>Show Plan</summary>
-            \`\`\`\n
-            ${process.env.PLAN}
-            \`\`\`
-            </details>
-            *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`*`;
-            github.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: output
-            })
       - name: Terraform Plan Status
         if: steps.plan.outcome == 'failure'
         run: exit 1
@@ -87,48 +61,24 @@ jobs:
         id: terraid
         run: terraform apply -auto-approve
         working-directory: ./flugel.it/terraform
-      
-      - name: afadf
-        id: terra_output
-        run: export output=$(terraform output instance_public_uri)
-        working-directory: ./flugel.it/terraform
-        
-      - name: afadf
-        id: terra_output1
-        run: echo $output
-        working-directory: ./flugel.it/terraform
         
       - name: sdfsdf
         id: setting_output
-        run: echo "::set-output name=ec2_uri::$(terraform output -raw instance_public_uri)"
+        run: echo "::set-output name=app_url::$(terraform output -raw application_url)"
         working-directory: ./flugel.it/terraform
         
-      - name: fssdf
-        run: echo "The selected color is ${{ steps.setting_output.outputs.ec2_uri }}"         
-        env:
-          EC2_URI: "The selected color is ${{ steps.setting_output.outputs.ec2_uri }}"
-        
-      - name: afadf
-        run:  echo $EC2_URI
-        
-      - name: Sleep for 30 seconds
+      - name: Sleep for 90 seconds
         uses: jakejarvis/wait-action@master
         with:
           time: '90s'
         
-      - name: checking py service
-        run: curl "${{ steps.setting_output.outputs.ec2_uri }}:8001/tags"
+      - name: checking py serviceh
+        run: curl "${{ steps.setting_output.outputs.app_url }}:8000/tags"
         continue-on-error: true
         
       - name: checking py serviceh
-        run: curl "${{ steps.setting_output.outputs.ec2_uri }}:8001/tags"
+        run: curl "${{ steps.setting_output.outputs.app_url }}:8000/tags"
         continue-on-error: true
-        
-      - name: curl
-        uses: wei/curl@master
-        with:
-          args: "${{ steps.setting_output.outputs.ec2_uri }}:8001/tags"
-        
         
       - name: Clean up
         if: always()
